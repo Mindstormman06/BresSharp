@@ -19,6 +19,8 @@ public sealed class BresSubfile(string name, byte[] data)
 
     public bool HasHeader => Magic is "MDL0" or "TEX0" or "PLT0" or "CHR0" or "CLR0" or "SRT0" or "PAT0" or "VIS0" or "SHP0" or "SCN0";
 
+    public bool UsesXtx => Magic == "TEX0" && Data.Length >= 0x38 && BinaryPrimitives.ReadUInt32BigEndian(Data.AsSpan(0x34)) != 0;
+
     public int Alignment => Magic is "CHR0" or "CLR0" or "SRT0" or "PAT0" or "VIS0" or "SHP0" or "SCN0" ? 4 : 0x20;
 
     public override string ToString() => $"{Name} ({Magic}, 0x{Data.Length:X} bytes)";
@@ -45,6 +47,8 @@ public sealed class BresFile
     public BresFolder? this[string name] => Folders.Find(f => f.Name == name);
 
     public IEnumerable<BresSubfile> AllFiles => Folders.SelectMany(f => f.Files);
+
+    public IReadOnlyList<BresSubfile> XtxTextureSlots => [.. this["Textures(NW4R)"]?.Files.Where(f => f.UsesXtx) ?? []];
 
     public static bool IsBres(ReadOnlySpan<byte> data) => data.Length >= HeaderSize && data[..4].SequenceEqual("bres"u8);
 

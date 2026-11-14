@@ -14,6 +14,9 @@ Sub-files (MDL0, TEX0, PLT0, CHR0, CLR0, SRT0, PAT0, VIS0, SHP0, SCN0, and Exter
 references into the shared string pool are found on read and rewritten on write, so sub-files can be added, removed,
 renamed or moved between archives.
 
+In *Skyward Sword HD*, TEX0 entries with a non-zero word at 0x34 (`BresSubfile.UsesXtx`) get their image from the
+`model.xtx` beside the BRRES; `BresFile.XtxTextureSlots` lists them in the order the XTX textures are assigned.
+
 ## Models
 
 ```csharp
