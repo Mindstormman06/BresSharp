@@ -24,7 +24,34 @@ public sealed class Mdl0Vertex
     public int[] TexCoord { get; } = [-1, -1, -1, -1, -1, -1, -1, -1];
 }
 
-public sealed record Mdl0Primitive(GxPrimitive Type, IReadOnlyList<Mdl0Vertex> Vertices, IReadOnlyList<(byte Op, ushort Index, ushort Address)> MatrixLoads);
+public sealed record Mdl0Primitive(GxPrimitive Type, IReadOnlyList<Mdl0Vertex> Vertices, IReadOnlyList<(byte Op, ushort Index, ushort Address)> MatrixLoads)
+{
+    // Lines and points make no triangles.
+    public IEnumerable<(Mdl0Vertex A, Mdl0Vertex B, Mdl0Vertex C)> Triangles()
+    {
+        IReadOnlyList<Mdl0Vertex> v = Vertices;
+        switch (Type)
+        {
+            case GxPrimitive.Triangles:
+                for (int i = 0; i + 2 < v.Count; i += 3) yield return (v[i], v[i + 1], v[i + 2]);
+                break;
+            case GxPrimitive.TriangleStrip:
+                for (int i = 0; i + 2 < v.Count; i++)
+                    yield return i % 2 == 0 ? (v[i], v[i + 1], v[i + 2]) : (v[i + 1], v[i], v[i + 2]);
+                break;
+            case GxPrimitive.TriangleFan:
+                for (int i = 1; i + 1 < v.Count; i++) yield return (v[0], v[i], v[i + 1]);
+                break;
+            case GxPrimitive.Quads:
+                for (int i = 0; i + 3 < v.Count; i += 4)
+                {
+                    yield return (v[i], v[i + 1], v[i + 2]);
+                    yield return (v[i], v[i + 2], v[i + 3]);
+                }
+                break;
+        }
+    }
+}
 
 public sealed class Mdl0Shape
 {
@@ -116,33 +143,7 @@ public sealed class Mdl0Shape
         }
     }
 
-    public IEnumerable<(Mdl0Vertex A, Mdl0Vertex B, Mdl0Vertex C)> Triangles()
-    {
-        foreach (Mdl0Primitive prim in Primitives)
-        {
-            IReadOnlyList<Mdl0Vertex> v = prim.Vertices;
-            switch (prim.Type)
-            {
-                case GxPrimitive.Triangles:
-                    for (int i = 0; i + 2 < v.Count; i += 3) yield return (v[i], v[i + 1], v[i + 2]);
-                    break;
-                case GxPrimitive.TriangleStrip:
-                    for (int i = 0; i + 2 < v.Count; i++)
-                        yield return i % 2 == 0 ? (v[i], v[i + 1], v[i + 2]) : (v[i + 1], v[i], v[i + 2]);
-                    break;
-                case GxPrimitive.TriangleFan:
-                    for (int i = 1; i + 1 < v.Count; i++) yield return (v[0], v[i], v[i + 1]);
-                    break;
-                case GxPrimitive.Quads:
-                    for (int i = 0; i + 3 < v.Count; i += 4)
-                    {
-                        yield return (v[i], v[i + 1], v[i + 2]);
-                        yield return (v[i], v[i + 2], v[i + 3]);
-                    }
-                    break;
-            }
-        }
-    }
+    public IEnumerable<(Mdl0Vertex A, Mdl0Vertex B, Mdl0Vertex C)> Triangles() => Primitives.SelectMany(p => p.Triangles());
 
     private int ReadIndex(byte[] d, ref int p, int mode)
     {

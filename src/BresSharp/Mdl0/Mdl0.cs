@@ -98,6 +98,13 @@ public sealed class Mdl0Model
     internal void SetU32(int at, uint value) => BinaryPrimitives.WriteUInt32BigEndian(Data.AsSpan(at), value);
     internal System.Numerics.Vector3 Vec3(int at) => new(F32(at), F32(at + 4), F32(at + 8));
 
+    // A stored 3x4 matrix (three rows of four floats) as a row-vector Matrix4x4.
+    internal System.Numerics.Matrix4x4 Matrix3x4(int at) => new(
+        F32(at), F32(at + 16), F32(at + 32), 0,
+        F32(at + 4), F32(at + 20), F32(at + 36), 0,
+        F32(at + 8), F32(at + 24), F32(at + 40), 0,
+        F32(at + 12), F32(at + 28), F32(at + 44), 1);
+
     internal void SetVec3(int at, System.Numerics.Vector3 v)
     {
         SetF32(at, v.X);

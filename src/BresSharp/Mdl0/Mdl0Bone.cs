@@ -51,8 +51,8 @@ public sealed class Mdl0Bone
     public Vector3 Translation { get => _model.Vec3(Offset + 0x38); set => _model.SetVec3(Offset + 0x38, value); }
     public Vector3 BoundsMin { get => _model.Vec3(Offset + 0x44); set => _model.SetVec3(Offset + 0x44, value); }
     public Vector3 BoundsMax { get => _model.Vec3(Offset + 0x50); set => _model.SetVec3(Offset + 0x50, value); }
-    public Matrix4x4 Transform => ReadMatrix(Offset + 0x70);
-    public Matrix4x4 InverseTransform => ReadMatrix(Offset + 0xA0);
+    public Matrix4x4 Transform => _model.Matrix3x4(Offset + 0x70);
+    public Matrix4x4 InverseTransform => _model.Matrix3x4(Offset + 0xA0);
 
     public Mdl0Bone? Parent { get; private set; }
     public IReadOnlyList<Mdl0Bone> Children { get; private set; } = [];
@@ -71,12 +71,6 @@ public sealed class Mdl0Bone
         int offset = _model.I32(Offset + field);
         return offset != 0 && bonesAt.TryGetValue(Offset + offset, out Mdl0Bone? bone) ? bone : null;
     }
-
-    private Matrix4x4 ReadMatrix(int at) => new(
-        _model.F32(at), _model.F32(at + 16), _model.F32(at + 32), 0,
-        _model.F32(at + 4), _model.F32(at + 20), _model.F32(at + 36), 0,
-        _model.F32(at + 8), _model.F32(at + 24), _model.F32(at + 40), 0,
-        _model.F32(at + 12), _model.F32(at + 28), _model.F32(at + 44), 1);
 
     public override string ToString() => $"{Name} T{Translation} R{Rotation} S{Scale}";
 }
