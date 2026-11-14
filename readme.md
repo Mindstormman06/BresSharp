@@ -32,6 +32,22 @@ and their texture references, shaders (raw GX code), shapes (display lists decod
 the definition bytecode. Fixed-size fields can be edited; adding or removing bones, materials or vertices is not
 supported yet.
 
+## Animations
+
+```csharp
+Chr0Animation walk = new(bres["AnmChr(NW4R)"]!["walk"]!);
+foreach (Chr0Bone bone in walk.Bones)
+    Console.WriteLine($"{bone.Name}: {bone.RotationAt(10)} {bone.TranslationAt(10)}");
+
+Srt0Animation scroll = new(bres["AnmTexSrt(NW4R)"]!["MA02"]!);
+Vector2 uv = scroll.Materials[0].Matrices[0].TranslationAt(120);
+```
+
+CHR0 and SRT0 version 5, read-only. Each component is an `AnimTrack`: a fixed value, Hermite keys (I4, I6, I12),
+or a baked per-frame array (L1, L2, L4 for rotations). `Evaluate(frame)` interpolates. CHR0 data offsets are relative
+to the bone entry; SRT0 key offsets are relative to the word that holds them, and SRT0 keys are (frame, value,
+tangent).
+
 ## Build
 
 ```bash
