@@ -65,15 +65,18 @@ internal sealed class StringRefs
             case "SCN0":
                 Header(7);
                 foreach (int folder in Group(Section(0)))
-                    foreach (int item in Group(folder))
+                    foreach (int item in Group(folder)) Scn0Item(item, U32(item) == 0x4C);
+                for (int kind = 0; kind < 5; kind++)
+                {
+                    int item = Section(1 + kind);
+                    for (int i = 0; i < U16(0x3C + kind * 2) && item > 0; i++)
                     {
-                        Ref(item + 8, item);
-                        if (U32(item) == 0x4C)
-                        {
-                            Ref(item + 0x14, item);
-                            for (int i = 0; i < 8; i++) Ref(item + 0x1C + i * 4, item + 0x1C);
-                        }
+                        uint size = U32(item);
+                        if (size < 0x14 || size > 0x200 || item + size > _sub.Length) break;
+                        Scn0Item(item, kind == 0);
+                        item += (int)size;
                     }
+                }
                 break;
             case "MDL0":
                 Header(14);
@@ -107,6 +110,14 @@ internal sealed class StringRefs
         Group(Section(9)).Count();
         foreach (int shape in Group(Section(10))) Ref(shape + 0x38, shape);
         Group(Section(13)).Count();
+    }
+
+    private void Scn0Item(int item, bool lightSet)
+    {
+        Ref(item + 8, item);
+        if (!lightSet) return;
+        Ref(item + 0x14, item);
+        for (int i = 0; i < 8; i++) Ref(item + 0x1C + i * 4, item + 0x1C);
     }
 
     private void Header(int sections)

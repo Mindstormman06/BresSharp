@@ -43,7 +43,11 @@ Srt0Animation scroll = new(bres["AnmTexSrt(NW4R)"]!["MA02"]!);
 Vector2 uv = scroll.Materials[0].Matrices[0].TranslationAt(120);
 ```
 
-CHR0 and SRT0 version 5, read-only. Each component is an `AnimTrack`: a fixed value, Hermite keys (I4, I6, I12),
+Also `Pat0Animation` (texture swaps), `Clr0Animation` (material/TEV colours), `Vis0Animation` (bone visibility),
+`Shp0Animation` (morph weights) and `Scn0Animation` (light sets, lights, fogs, cameras: names and links, with each
+item's fields as raw bytes).
+
+CHR0 and SRT0 version 5, PAT0/CLR0/VIS0/SHP0 version 4, SCN0 version 5, all read-only. Each component is an `AnimTrack`: a fixed value, Hermite keys (I4, I6, I12),
 or a baked per-frame array (L1, L2, L4 for rotations). `Evaluate(frame)` interpolates. CHR0 data offsets are relative
 to the bone entry; SRT0 key offsets are relative to the word that holds them, and SRT0 keys are (frame, value,
 tangent).
